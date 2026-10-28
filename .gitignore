@@ -22,3 +22,11 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# 에이전트 지침 (backend/CLAUDE.md, frontend/AGENTS.md 등 어느 폴더든 제외)
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+
+# Claude Code 로컬 설정·스킬
+.claude/
