@@ -1,0 +1,73 @@
+package com.daebangg.sayroam.room.domain;
+
+import com.daebangg.sayroam.global.entity.BaseTimeEntity;
+import com.daebangg.sayroam.user.domain.User;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+// 나간 멤버도 정산 대상이라 행을 지우지 않고 status로 남긴다
+@Entity
+@Table(
+        name = "room_member",
+        uniqueConstraints = @UniqueConstraint(name = "uk_room_member_room_user", columnNames = {"room_id", "user_id"})
+)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class RoomMember extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private RoomMemberRole role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private RoomMemberStatus status;
+
+    // 안 읽은 메시지 수 계산용. 연관관계 없이 값으로만 둔다
+    private Long lastReadMessageId;
+
+    @Column(nullable = false)
+    private boolean notificationMuted;
+
+    // 마지막으로 들어온 시각. 처음 들어온 시각은 createdAt
+    @Column(nullable = false)
+    private LocalDateTime joinedAt;
+
+    private LocalDateTime leftAt;
+
+    @Builder
+    private RoomMember(Room room, User user, RoomMemberRole role) {
+        this.room = room;
+        this.user = user;
+        this.role = role;
+        this.status = RoomMemberStatus.JOINED;
+        this.joinedAt = LocalDateTime.now();
+    }
+
+}
