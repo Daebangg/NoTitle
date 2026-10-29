@@ -1,0 +1,59 @@
+// Gradle Flyway 플러그인은 Spring 설정을 자동으로 읽지 않는다.
+// 개인 local 설정과 표준 SPRING_DATASOURCE_* 환경변수를 명시적으로 공유한다.
+flyway {
+    locations = ["filesystem:${projectDir}/src/main/resources/db/migration"]
+    configurations = ['runtimeClasspath']
+    cleanDisabled = true
+    baselineOnMigrate = false
+    validateMigrationNaming = true
+}
+
+def localConfig = layout.projectDirectory.file('config/application-local.properties').asFile
+def connectionOverrideKeys = ['flyway.url', 'flyway.user', 'flyway.password', 'flyway.configFiles']
+def hasConnectionProjectOverride = connectionOverrideKeys.any { providers.gradleProperty(it).isPresent() }
+
+['flywayInfo', 'flywayValidate', 'flywayMigrate'].each { taskName ->
+    tasks.named(taskName) {
+        doFirst {
+            def connection = new Properties()
+            if (localConfig.exists()) {
+                localConfig.withReader('UTF-8') { connection.load(it) }
+            }
+
+            def settings = [:]
+            ['url': 'URL', 'username': 'USERNAME', 'password': 'PASSWORD'].each { key, suffix ->
+                def value = System.getenv("SPRING_DATASOURCE_${suffix}")
+                if (value == null) {
+                    value = connection.getProperty("spring.datasource.${key}")
+                }
+                if (value == null || value.isBlank()) {
+                    throw new GradleException("Missing spring.datasource.${key}: configure config/application-local.properties or SPRING_DATASOURCE_${suffix}.")
+                }
+                if (value.contains('${')) {
+                    throw new GradleException("Use a literal spring.datasource.${key} value or SPRING_DATASOURCE_${suffix}; Gradle does not resolve Spring placeholders.")
+                }
+                settings[key] = value
+            }
+
+            // Gradle 플러그인의 별도 연결 변수로 앱과 다른 DB를 선택하지 못하게 한다.
+            if (['FLYWAY_URL', 'FLYWAY_USER', 'FLYWAY_PASSWORD', 'FLYWAY_CONFIG_FILES'].any { System.getenv(it) != null }
+                    || connectionOverrideKeys.any { System.getProperty(it) != null }
+                    || hasConnectionProjectOverride) {
+                throw new GradleException('Use only the shared Spring datasource settings; FLYWAY_* connection overrides are not supported.')
+            }
+
+            if (!settings.url.startsWith('jdbc:mysql://')) {
+                throw new GradleException('Expected a jdbc:mysql:// datasource URL.')
+            }
+            def target = new URI(settings.url.substring('jdbc:'.length()))
+            if (target.host == null || target.userInfo != null || !target.path || target.path == '/') {
+                throw new GradleException('Expected a MySQL host and database name; URL-embedded credentials are not supported.')
+            }
+            url = settings.url
+            user = settings.username
+            password = settings.password
+            // 접속 비밀번호, 사용자명 및 URL 쿼리 파라미터는 출력하지 않는다.
+            logger.lifecycle("Flyway target: ${target.host}:${target.port == -1 ? 3306 : target.port}${target.path}")
+        }
+    }
+}

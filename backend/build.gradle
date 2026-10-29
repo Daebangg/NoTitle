@@ -1,7 +1,18 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        // Spring Boot 4.1.2가 관리하는 Flyway 버전과 일치시킨다.
+        classpath 'org.flywaydb:flyway-mysql:12.4.0'
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '4.1.2'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.flywaydb.flyway' version '12.4.0'
 }
 
 group = 'com.daebangg'
@@ -23,13 +34,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
+    runtimeOnly 'org.flywaydb:flyway-mysql'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-mysql'
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
@@ -39,7 +54,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-// 앱 실행과 DB 기동은 명시적으로 분리한다. bootRun/build/test는 Docker를 실행하지 않는다.
+// 앱/마이그레이션 명령은 개발 DB를 자동 기동하지 않는다. 테스트는 임시 DB를 사용한다.
 def composeFile = layout.projectDirectory.file('../docker/compose.yaml').asFile
 def composeEnvFile = layout.projectDirectory.file('../docker/.env').asFile
 
@@ -47,6 +62,8 @@ def composeEnvFile = layout.projectDirectory.file('../docker/.env').asFile
 tasks.named('bootRun') {
     workingDir layout.projectDirectory.asFile
 }
+
+apply from: 'gradle/flyway.gradle'
 def composeTasks = [
     dockerInit: [description: 'Create and start local MySQL, waiting until healthy (preserves data).', args: ['up', '-d', '--wait', '--wait-timeout', '180']],
     dockerStop: [description: 'Stop local MySQL without removing containers or data.', args: ['stop']],
