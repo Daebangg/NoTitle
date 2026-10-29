@@ -1,4 +1,4 @@
-package com.daebangg.sayroam.companion.domain;
+package com.daebangg.sayroam.travelstyle.domain;
 
 import com.daebangg.sayroam.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
