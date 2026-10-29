@@ -38,3 +38,28 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// 앱 실행과 DB 기동은 명시적으로 분리한다. bootRun/build/test는 Docker를 실행하지 않는다.
+def composeFile = layout.projectDirectory.file('../docker/compose.yaml').asFile
+def composeEnvFile = layout.projectDirectory.file('../docker/.env').asFile
+
+// local 프로필의 상대 경로 설정을 IDE/CLI에서 동일하게 해석한다.
+tasks.named('bootRun') {
+    workingDir layout.projectDirectory.asFile
+}
+def composeTasks = [
+    dockerInit: [description: 'Create and start local MySQL, waiting until healthy (preserves data).', args: ['up', '-d', '--wait', '--wait-timeout', '180']],
+    dockerStop: [description: 'Stop local MySQL without removing containers or data.', args: ['stop']],
+    dockerDown: [description: 'Remove local containers and network, preserving database volumes.', args: ['down']],
+    dockerStatus: [description: 'Show local Docker Compose service status.', args: ['ps', '--all']],
+    dockerLogs: [description: 'Show the last 100 lines of local MySQL logs.', args: ['logs', '--tail', '100', 'mysql']]
+]
+
+composeTasks.each { taskName, config ->
+    tasks.register(taskName, Exec) {
+        group = 'docker'
+        description = config.description
+        workingDir composeFile.parentFile
+        commandLine(['docker', 'compose', '--env-file', composeEnvFile.absolutePath, '-f', composeFile.absolutePath] + config.args)
+    }
+}

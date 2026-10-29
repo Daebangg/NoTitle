@@ -26,3 +26,11 @@ replay_pid*
 # 개인 로컬 에이전트 설정 (팀 공용 CLAUDE.md, AGENTS.md, .claude/skills는 공유)
 CLAUDE.local.md
 .claude/settings.local.json
+
+# 개인 환경변수 파일은 커밋하지 않는다. 공유 템플릿만 추적한다.
+.env
+.env.*
+!.env.example
+
+# Spring Boot 개인 로컬 설정 (예시 파일은 공유)
+/backend/config/application-local.properties
