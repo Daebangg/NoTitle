@@ -57,3 +57,12 @@ git checkout dev
 git pull origin dev
 git checkout -b feat/12-user-signup
 ```
+
+Before running the commands above:
+
+1. Run `git status`. If there are uncommitted changes, stop and ask the user
+   how to handle them (commit on the current branch, stash, or discard).
+   Never carry them onto the new branch, where they would end up in the wrong PR.
+2. After `git checkout dev`, confirm with `git branch --show-current` that the
+   current branch really is `dev` before creating the new branch. Branching
+   from another work branch copies that branch's unmerged commits into this one.
