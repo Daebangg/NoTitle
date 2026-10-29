@@ -35,11 +35,21 @@ allowed-tools: Bash(gh issue list *) Bash(gh issue view *) Bash(gh label list *)
 
 ## Creating the issue
 
-Attach a **type label** matching the work type and an assignee:
+Attach a **type label**, the **area label(s)**, and an assignee:
 
 ```bash
-gh issue create --title "..." --body "..." --label "<type>" --assignee @me
+gh issue create --title "..." --body "..." \
+  --label "<type>" --label "BE" --assignee @me
 ```
+
+- **Type label** matches the work type: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`, `hotfix`.
+- **Area label(s)** mark which part of the repo the work touches, applied *additively*
+  (one issue may carry both):
+  - backend work (`backend/**`) → `BE`
+  - frontend work (`frontend/**`) → `FE`
+
+  An issue has no diff yet, so pick the area(s) from the work's intended scope.
+  Work that touches neither (CI, root config, agent skills) gets no area label.
 
 Check `gh label list` first and use only labels that exist in the repository.
 
