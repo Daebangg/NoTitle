@@ -64,14 +64,26 @@ Closes #N
 
 - **Assignee**: `--assignee @me` (the PR author).
 - **Type label**: match the branch type, using the same label as the issue.
+- **Area label(s)**: derived from the changed paths, applied *additively* —
+  one PR may carry both:
+  - `backend/**` → `BE`
+  - `frontend/**` → `FE`
 
-Keep only the labels that actually exist in the repository — `gh pr create`
-fails outright on an unknown label:
+Build the candidate list, then keep only the labels that actually exist in the
+repository — `gh pr create` fails outright on an unknown label:
 
 ```bash
 TYPE_LABEL="<type>"   # set to the branch type's label
+FILES=$(git diff "$BASE"...HEAD --name-only)
+
+LABELS=("$TYPE_LABEL")
+grep -q '^backend/'  <<<"$FILES" && LABELS+=("BE")
+grep -q '^frontend/' <<<"$FILES" && LABELS+=("FE")
+
 EXISTING=$(gh label list --limit 200 --json name -q '.[].name')
-LABEL_ARGS=(); grep -qxF "$TYPE_LABEL" <<<"$EXISTING" && LABEL_ARGS+=(--label "$TYPE_LABEL")
+LABEL_ARGS=(); for l in "${LABELS[@]}"; do
+  grep -qxF "$l" <<<"$EXISTING" && LABEL_ARGS+=(--label "$l")
+done
 ```
 
 ## Creating the PR
