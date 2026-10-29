@@ -8,7 +8,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -17,10 +16,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(
-        name = "trip_place",
-        indexes = @Index(name = "idx_trip_place_trip_day_order", columnList = "trip_id, day_number, visit_order")
-)
+@Table(name = "trip_place")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TripPlace extends BaseTimeEntity {
 

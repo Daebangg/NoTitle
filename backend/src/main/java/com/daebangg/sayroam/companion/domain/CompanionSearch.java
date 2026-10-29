@@ -14,7 +14,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -23,10 +22,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(
-        name = "companion_search",
-        indexes = @Index(name = "idx_companion_search_status_region_start", columnList = "status, region, start_date")
-)
+@Table(name = "companion_search")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CompanionSearch extends BaseTimeEntity {
 
