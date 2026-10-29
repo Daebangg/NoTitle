@@ -49,6 +49,13 @@ Related #이슈번호
 - For small changes, the title line alone is enough.
 - Split commits by concern — one commit should not mix unrelated changes.
 
+## Committing
+
+1. Stage only the intended files by path (`git add -- <path>...`). Never use `git add -A` or `git add .`.
+2. Commit with the formatted message (`git commit -F -` with a heredoc keeps the multi-line body intact).
+3. Verify with `git status` and `git log -1 --stat` that only the intended files were committed.
+4. Repeat 1–3 for each concern when the changes are split into multiple commits.
+
 ## Example
 
 ```
