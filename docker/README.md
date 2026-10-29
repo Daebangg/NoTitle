@@ -40,16 +40,15 @@ DB가 준비된 뒤 앱 전용 `backend/config/application-local.properties`를 
 설정 방법은 [로컬 앱 개발 환경](../backend/README.md)을 참고하세요.
 
 ```bash
+./backend/gradlew -p backend flywayMigrate
 ./backend/gradlew -p backend bootRun --args='--spring.profiles.active=local'
 ```
 
 IntelliJ에서 직접 앱을 실행할 때는 활성 프로필을 `local`, Working directory를
 저장소의 `backend/` 절대 경로로 지정합니다. 앱은 `backend/config/application-local.properties`를 읽습니다.
-`bootRun`, `build`, `test`는 Docker를 자동으로 실행하지 않습니다.
-현재 Hibernate DDL과 SQL 초기화는 비활성화되어 있습니다.
-`dev`에 반영된 엔티티가 있어도 이 설정으로는 대응하는 테이블을 만들지 않습니다.
-지금은 DB 기동과 연결 준비까지의 구성이며, 엔티티를 사용하는 조회·저장은 스키마 구성 이후에 확인합니다.
-스키마 작업을 시작할 때 Flyway와 첫 마이그레이션을 추가하고 `ddl-auto=validate`로 전환합니다.
+`bootRun`은 개발 DB를 자동 기동하지 않습니다. `test`와 테스트를 포함하는 `build`는 별도의 임시 MySQL을 사용합니다.
+Docker 초기 SQL과 Hibernate 자동 생성은 사용하지 않습니다. 스키마는 `flywayMigrate`로 갱신하고
+앱은 `ddl-auto=validate`로 검증합니다. [명령 및 변경 규칙](../backend/gradle/README.md)을 참고하세요.
 
 ### 상태 확인 및 종료
 
@@ -98,6 +97,7 @@ Docker 포트를 일시적으로 바꾸려면 셸 환경변수를 지정합니�
 ```bash
 export DB_PORT=13306
 ./backend/gradlew -p backend dockerInit
+./backend/gradlew -p backend flywayMigrate
 ./backend/gradlew -p backend bootRun --args='--spring.profiles.active=local'
 ```
 

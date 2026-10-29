@@ -37,9 +37,10 @@ Properties는 `키=값`으로 작성하고 값에 따옴표를 붙이지 않습�
 
 ## 실행
 
-DB 준비 후 저장소 루트에서 실행합니다.
+DB 준비 후 [마이그레이션 안내](gradle/README.md)에 따라 스키마를 적용하고 앱을 실행합니다.
 
 ```bash
+./backend/gradlew -p backend flywayMigrate
 ./backend/gradlew -p backend bootRun --args='--spring.profiles.active=local'
 ```
 
@@ -51,5 +52,6 @@ IntelliJ Run Configuration:
 
 환경변수 `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`는
 파일의 연결 설정보다 우선합니다. 운영에서는 `local` 프로필 없이 이 환경변수로 연결 정보를 주입합니다.
-앱 실행은 Docker를 자동 기동하지 않습니다. 테이블 자동 생성도 비활성화되어 있으며,
-테이블 생성·변경은 후속 Flyway 작업에서 관리합니다.
+앱 실행은 Docker를 자동 기동하거나 스키마를 변경하지 않습니다.
+테이블 생성·변경은 `flywayMigrate`로 실행하고 앱은 엔티티와 DB 매핑을 검증합니다.
+빈 DB 또는 미적용 변경이 있으면 마이그레이션을 먼저 실행하세요.
