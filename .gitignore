@@ -23,10 +23,6 @@
 hs_err_pid*
 replay_pid*
 
-# 에이전트 지침 (backend/CLAUDE.md, frontend/AGENTS.md 등 어느 폴더든 제외)
-CLAUDE.md
+# 개인 로컬 에이전트 설정 (팀 공용 CLAUDE.md, AGENTS.md, .claude/skills는 공유)
 CLAUDE.local.md
-AGENTS.md
-
-# Claude Code 로컬 설정·스킬
-.claude/
+.claude/settings.local.json
