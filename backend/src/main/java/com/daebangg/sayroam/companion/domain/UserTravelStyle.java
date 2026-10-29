@@ -36,7 +36,6 @@ public class UserTravelStyle extends BaseTimeEntity {
     @JoinColumn(name = "item_id", nullable = false)
     private TravelStyleItem item;
 
-    // 1~5
     @Column(nullable = false)
     private int score;
 
