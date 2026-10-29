@@ -16,7 +16,12 @@ allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *) Bash(git bran
 2. Verify the current branch is a work branch (`feat/`, `fix/`, `refactor/`,
    `test/`, `chore/`, `docs/`, `hotfix/`). Never commit directly to `main`
    or `dev`.
-3. Exclude Claude working files from the commit (scratch notes, generated reports).
+3. Confirm the changes belong to the branch's issue. If the work being committed is for a different issue (the user
+   named another issue number, or the changes fall outside this issue's scope), stop and tell the user instead of
+   committing — the commit would leak into the wrong PR. Suggest switching to (or creating) that issue's branch.
+4. Check `git log --oneline origin/dev..HEAD` for commits that reference a different issue number. If any exist, the
+   branch already carries another issue's work; report it to the user before adding more commits.
+5. Exclude Claude working files from the commit (scratch notes, generated reports).
 
 ## Message format
 
