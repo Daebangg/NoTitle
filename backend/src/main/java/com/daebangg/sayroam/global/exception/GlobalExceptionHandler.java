@@ -46,15 +46,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     // 404, 405, 415, 본문 파싱 실패 등 Spring 기본 예외에도 code 부여
+    // 이 예외들은 body가 null로 넘어오고 super에서 ProblemDetail이 만들어지므로, super 호출 후 결과에 붙인다
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
             Exception e, Object body,
             HttpHeaders headers,
             HttpStatusCode status, WebRequest request) {
-        if (body instanceof ProblemDetail problemDetail && !hasCode(problemDetail)) {
+        ResponseEntity<Object> response = super.handleExceptionInternal(e, body, headers, status, request);
+        if (response != null && response.getBody() instanceof ProblemDetail problemDetail && !hasCode(problemDetail)) {
             problemDetail.setProperty(CODE, toCode(status));
         }
-        return super.handleExceptionInternal(e, body, headers, status, request);
+        return response;
     }
 
     // 메서드 보안(@PreAuthorize 등)에서 난 인증·인가 예외는 Security 필터가 401/403으로 처리하도록 그대로 던진다
