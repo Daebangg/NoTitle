@@ -35,7 +35,10 @@ allowed-tools: Bash(gh issue list *) Bash(gh issue view *) Bash(gh label list *)
 
 ## Creating the issue
 
-Attach a **type label**, the **area label(s)**, and an assignee:
+Attach a **type label**, any applicable **area label(s)**, and an assignee.
+For work outside both BE and FE areas, omit area labels.
+
+Example for backend work:
 
 ```bash
 gh issue create --title "..." --body "..." \
