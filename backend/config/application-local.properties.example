@@ -1,0 +1,6 @@
+# --------------------------------------------------------
+# DB connections
+# --------------------------------------------------------
+spring.datasource.url=jdbc:mysql://localhost:3306/sayroam
+spring.datasource.username=sayroam
+spring.datasource.password=sayroam-local
