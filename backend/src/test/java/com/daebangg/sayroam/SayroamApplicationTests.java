@@ -1,10 +1,10 @@
-package com.daebangg.backend;
+package com.daebangg.sayroam;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BackendApplicationTests {
+class SayroamApplicationTests {
 
     @Test
     void contextLoads() {
