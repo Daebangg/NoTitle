@@ -34,6 +34,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0'
     implementation 'org.springframework.boot:spring-boot-starter-flyway'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
@@ -78,5 +79,41 @@ composeTasks.each { taskName, config ->
         description = config.description
         workingDir composeFile.parentFile
         commandLine(['docker', 'compose', '--env-file', composeEnvFile.absolutePath, '-f', composeFile.absolutePath] + config.args)
+    }
+}
+
+// OpenAPI info.version에 Gradle 프로젝트 버전을 사용한다.
+springBoot {
+    buildInfo()
+}
+
+tasks.register('exportOpenApi') {
+    group = 'documentation'
+    description = 'Export OpenAPI from a running local app (-PapiDocsUrl=...).'
+    doLast {
+        def endpoint = providers.gradleProperty('apiDocsUrl').getOrElse('http://localhost:8080/v3/api-docs')
+        def connection = URI.create(endpoint).toURL().openConnection()
+        connection.connectTimeout = 5000
+        connection.readTimeout = 10000
+        def document
+        try {
+            def status = connection.responseCode
+            if (status != 200) {
+                throw new GradleException("OpenAPI 요청 실패: HTTP ${status} (${endpoint}). local 프로필과 서버 포트를 확인하세요. localhost의 IPv4/IPv6 서버가 다르면 -PapiDocsUrl로 주소를 명시하세요.")
+            }
+            document = connection.inputStream.withCloseable { it.getText('UTF-8') }
+        } catch (IOException exception) {
+            throw new GradleException("OpenAPI 서버 연결 실패 (${endpoint}). 앱을 local 프로필로 실행하고 -PapiDocsUrl로 실제 주소를 지정하세요.", exception)
+        } finally {
+            connection.disconnect()
+        }
+        def parsed = new groovy.json.JsonSlurper().parseText(document)
+        if (!parsed.openapi || !parsed.info?.version || parsed.paths == null) {
+            throw new GradleException('Response is not an OpenAPI document')
+        }
+        def output = layout.buildDirectory.file('openapi/openapi.json').get().asFile
+        output.parentFile.mkdirs()
+        output.text = groovy.json.JsonOutput.prettyPrint(document) + '\n'
+        logger.lifecycle("OpenAPI ${parsed.info.version}: ${output}")
     }
 }
