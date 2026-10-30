@@ -1,11 +1,7 @@
 package com.daebangg.sayroam.global.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
@@ -28,8 +24,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ProblemDetail> handleBusiness(BusinessException e) {
         ErrorCode code = e.getErrorCode();
-        ProblemDetail body = ProblemDetail.forStatusAndDetail(code.getStatus(), e.getMessage());
-        body.setProperty(CODE, code.getCode());
+        ProblemDetail body = ApiProblems.of(code);
         return ResponseEntity.status(code.getStatus()).body(body);
     }
 
@@ -39,8 +34,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             MethodArgumentNotValidException e,
             HttpHeaders headers,
             HttpStatusCode status, WebRequest request) {
-        ProblemDetail body = ProblemDetail.forStatusAndDetail(status, CommonErrorCode.INVALID_INPUT.getMessage());
-        body.setProperty(CODE, CommonErrorCode.INVALID_INPUT.getCode());
+        ProblemDetail body = ApiProblems.of(CommonErrorCode.INVALID_INPUT);
         body.setProperty("errors", toFieldErrors(e.getBindingResult().getFieldErrors()));
         return handleExceptionInternal(e, body, headers, status, request);
     }
@@ -70,8 +64,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ProblemDetail> handleUnexpected(Exception e) {
         log.error("Unhandled exception", e);
         CommonErrorCode code = CommonErrorCode.INTERNAL_SERVER_ERROR;
-        ProblemDetail body = ProblemDetail.forStatusAndDetail(code.getStatus(), code.getMessage());
-        body.setProperty(CODE, code.getCode());
+        ProblemDetail body = ApiProblems.of(code);
         return ResponseEntity.status(code.getStatus()).body(body);
     }
 
