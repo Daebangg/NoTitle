@@ -16,11 +16,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
+import java.util.Optional;
 
 @Configuration
 public class OpenApiConfig {
     @Bean
-    OpenAPI openAPI(BuildProperties buildProperties) {
+    OpenAPI openAPI(Optional<BuildProperties> buildProperties) {
         // ProblemDetail의 동적 확장 필드도 프론트엔드 타입 생성기에 명시적으로 노출한다.
         Schema<Object> fieldError = new Schema<>();
         fieldError.setType("object");
@@ -50,7 +51,7 @@ public class OpenApiConfig {
                 .addResponses("Forbidden", problemResponse("403: ACCESS_DENIED 또는 INVALID_CSRF_TOKEN"))
                 .addResponses("InternalServerError", problemResponse("500: INTERNAL_SERVER_ERROR"));
         return new OpenAPI().components(components).servers(List.of(new Server().url("/")))
-                .info(new Info().title("Sayroam API").version(buildProperties.getVersion()));
+                .info(new Info().title("Sayroam API").version(buildProperties.map(BuildProperties::getVersion).orElse("dev")));
     }
 
     private ApiResponse problemResponse(String description) {

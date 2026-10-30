@@ -132,7 +132,8 @@ JSON 명세는 `/v3/api-docs`, YAML 명세는 `/v3/api-docs.yaml`입니다.
 ```
 
 결과는 `backend/build/openapi/openapi.json`입니다. `info.version`은 Gradle 프로젝트 버전
-(`0.0.1-SNAPSHOT`)이며, API 변경 시 버전을 관리하고 전달 파일과 소스 커밋을 함께 기록합니다.
+(`0.0.1-SNAPSHOT`)입니다. Gradle 빌드 정보 없이 IDE에서 실행하면 버전은 `dev`로 표시됩니다.
+API 변경 시 버전을 관리하고 전달 파일과 소스 커밋을 함께 기록합니다.
 명세의 서버 URL은 `/`로 고정하여 개발자별 호스트·포트가 계약 파일에 섞이지 않게 합니다.
 프론트엔드는 이 파일을 타입 생성기의 입력으로 사용할 수 있습니다.
 
